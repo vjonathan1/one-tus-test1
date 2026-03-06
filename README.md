@@ -1,1 +1,706 @@
-Site Content
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>There Is More</title>
+    <style>
+        /* --- Typography (.ttf files) --- */
+        @font-face {
+            font-family: 'Moderat';
+            src: url('Moderat-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Moderat';
+            src: url('Moderat-Bold.ttf') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Moderat';
+            src: url('Moderat-Light.ttf') format('truetype');
+            font-weight: 300;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Moderat';
+            src: url('Moderat-LightItalic.ttf') format('truetype');
+            font-weight: 300;
+            font-style: italic;
+        }
+
+        /* --- Variables & Base --- */
+        :root {
+            --bg-base: #020608;
+            --bg-surface: #0a1118;
+            --accent-green: #08241a;
+            --accent-blue: #0d2840;
+            --text-main: #f4f7fa;
+            --text-muted: #8b9ca8;
+            --btn-padding: 20px 28px;
+            --radius: 16px;
+            --nav-height: 85px;
+            --transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Moderat', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden;
+        }
+
+        /* Cinematic Noise Texture Overlay */
+        .texture-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* --- Page Container --- */
+        .page-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: calc(100dvh - var(--nav-height));
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: var(--bg-base);
+            display: none;
+            opacity: 0;
+            padding-bottom: 40px;
+        }
+
+        .page-container.active {
+            display: block;
+            animation: fadeInPage 0.5s forwards;
+        }
+
+        @keyframes fadeInPage {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Home Tab (Hero Video) --- */
+        #page-home {
+            height: 100dvh;
+            padding-bottom: 0;
+            overflow: hidden;
+        }
+
+        .video-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-base) 100%);
+        }
+
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.5;
+            filter: contrast(1.1) saturate(0.9);
+        }
+
+        .hero-overlay {
+            position: relative;
+            z-index: 10;
+            padding: 40px 24px calc(var(--nav-height) + 40px) 24px;
+            background: linear-gradient(to top, rgba(2,6,8,1) 0%, rgba(2,6,8,0.7) 40%, rgba(2,6,8,0) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            height: 100%;
+            width: 100%;
+        }
+
+        .unmute-btn {
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--text-main);
+            padding: 18px 36px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-family: 'Moderat', sans-serif;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 220px;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .unmute-btn:active {
+            transform: scale(0.96);
+        }
+
+        .captions {
+            font-size: 1.3rem;
+            text-align: center;
+            font-weight: 300;
+            margin-bottom: 40px;
+            min-height: 3.5rem;
+            text-shadow: 0px 2px 10px rgba(0,0,0,1);
+            letter-spacing: 0.5px;
+        }
+
+        .scroll-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            opacity: 0.9;
+            transition: opacity 0.6s ease;
+        }
+
+        .progress-ring { width: 44px; height: 44px; }
+        .progress-ring__circle {
+            transition: stroke-dashoffset 1s linear;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        .scroll-text {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            color: var(--text-muted);
+            font-weight: bold;
+        }
+
+        /* --- Typography & Layout for Content Pages --- */
+        .page-header {
+            padding: 60px 24px 20px 24px;
+            background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-base) 100%);
+        }
+
+        .page-content { padding: 0 24px 40px 24px; }
+
+        h2 {
+            font-size: 2.4rem;
+            font-weight: bold;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            background: -webkit-linear-gradient(0deg, #ffffff, #8b9ca8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .lead-text {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            font-weight: 300;
+            margin-bottom: 30px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+
+        /* --- Stories Page (Sub-tabs) --- */
+        .stories-nav {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            padding-bottom: 5px;
+        }
+        .stories-nav::-webkit-scrollbar { display: none; }
+
+        .story-btn {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-muted);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-family: 'Moderat', sans-serif;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .story-btn.active {
+            background: var(--text-main);
+            color: var(--bg-base);
+            font-weight: bold;
+        }
+
+        .story-content {
+            display: none;
+            animation: fadeInPage 0.4s forwards;
+        }
+        .story-content.active { display: block; }
+
+        .solo-video-placeholder {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-green) 100%);
+            border-radius: var(--radius);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        .solo-video-placeholder::after {
+            content: '▶';
+            font-size: 2rem;
+            color: rgba(255,255,255,0.9);
+            background: rgba(0,0,0,0.4);
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            backdrop-filter: blur(4px);
+        }
+
+        /* --- Cards (Community) --- */
+        .card {
+            background: linear-gradient(145deg, rgba(13, 40, 64, 0.4), rgba(8, 36, 26, 0.3));
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 36px 28px;
+            border-radius: var(--radius);
+            margin-bottom: 24px;
+            position: relative;
+        }
+        .card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        /* --- Form --- */
+        form { display: flex; flex-direction: column; gap: 20px; }
+        input, textarea {
+            width: 100%;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-main);
+            padding: var(--btn-padding);
+            border-radius: var(--radius);
+            font-family: 'Moderat', sans-serif;
+            font-size: 1.05rem;
+        }
+        input:focus, textarea:focus { outline: none; border-color: #4a6c8c; background: rgba(255,255,255,0.06); }
+        button.submit-btn {
+            background: var(--text-main);
+            color: var(--bg-base);
+            border: none;
+            padding: var(--btn-padding);
+            border-radius: var(--radius);
+            font-size: 1.15rem;
+            font-weight: bold;
+            font-family: 'Moderat', sans-serif;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        /* --- Floating Action Button (Share) --- */
+        .fab-share {
+            position: fixed;
+            bottom: calc(var(--nav-height) + 20px);
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #1c4938, #0a1f17);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+            z-index: 900;
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+        }
+        .fab-share svg { fill: var(--text-main); width: 22px; height: 22px; stroke: none; }
+
+        /* --- Bottom Navigation --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: var(--nav-height);
+            background: rgba(6, 11, 15, 0.95);
+            backdrop-filter: blur(15px);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-item {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.75rem;
+            gap: 6px;
+            width: 20%;
+            cursor: pointer;
+            z-index: 1; /* Sits behind home button naturally */
+            /* Cubic bezier gives it a smooth 'spring' feel as it slides out */
+            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.8s ease-out, color 0.4s;
+        }
+
+        /* Keeps the home button firmly above the sliding items */
+        .nav-item.home-btn {
+            z-index: 10;
+        }
+
+        .nav-item svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: var(--transition);
+        }
+
+        .nav-item.active {
+            color: var(--text-main);
+        }
+        
+        .nav-item.active svg {
+            stroke: var(--text-main);
+            fill: rgba(255,255,255,0.1);
+            transform: translateY(-2px); /* Slight lift for active state */
+        }
+
+        /* --- Slide Out Animation Classes --- */
+        /* TranslateX pulls each item into the exact center of the screen based on their flex order */
+        .nav-item.locked-tab.pos-1 { transform: translateX(200%); opacity: 0; pointer-events: none; }
+        .nav-item.locked-tab.pos-2 { transform: translateX(100%); opacity: 0; pointer-events: none; }
+        .nav-item.locked-tab.pos-4 { transform: translateX(-100%); opacity: 0; pointer-events: none; }
+        .nav-item.locked-tab.pos-5 { transform: translateX(-200%); opacity: 0; pointer-events: none; }
+
+    </style>
+</head>
+<body>
+    <div class="texture-overlay"></div>
+
+    <main id="page-home" class="page-container active">
+        <div class="video-container">
+            <video id="main-video" autoplay muted loop playsinline poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
+            </video>
+        </div>
+        
+        <div class="hero-overlay">
+            <div class="captions" id="caption-text">"I achieved everything I thought I wanted..."</div>
+            
+            <button class="unmute-btn" id="unmute-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+                Tap to Unmute
+            </button>
+
+            <div class="scroll-indicator" id="scroll-indicator">
+                <svg class="progress-ring" viewBox="0 0 50 50">
+                    <circle cx="25" cy="25" r="22" fill="transparent" stroke="rgba(255,255,255,0.1)" stroke-width="3"></circle>
+                    <circle id="progress-circle" cx="25" cy="25" r="22" fill="transparent" stroke="#f4f7fa" stroke-width="3" stroke-dasharray="138.2" stroke-dashoffset="138.2"></circle>
+                </svg>
+                <div class="scroll-text" id="scroll-text">Explore in 15s</div>
+            </div>
+        </div>
+    </main>
+
+    <main id="page-stories" class="page-container">
+        <div class="page-header">
+            <h2>Stories of Hope</h2>
+            <p class="lead-text">Listen to students just like you who found that "more" wasn't a destination, but a relationship.</p>
+        </div>
+        <div class="page-content">
+            <div class="stories-nav">
+                <button class="story-btn active" onclick="openStory('story1', this)">Sarah's Story</button>
+                <button class="story-btn" onclick="openStory('story2', this)">Marcus's Story</button>
+                <button class="story-btn" onclick="openStory('story3', this)">Chloe's Story</button>
+            </div>
+
+            <div id="story1" class="story-content active">
+                <div class="solo-video-placeholder"></div>
+                <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Finding True Purpose</h3>
+                <p>I grew up attending church sporadically, but it wasn't until my sophomore year here at the University of Alabama that I realized I was just going through the motions. I was heavily involved in Greek life, maintaining a 4.0 GPA, and building what looked like the perfect college resume.</p>
+                <p>But underneath it all, there was an exhausting emptiness. When a friend from class invited me to ONE, I walked in expecting a typical religious service. Instead, I found a room full of college students worshipping with a raw authenticity I had never seen. I started asking real questions, and I finally found answers that changed my trajectory entirely. Jesus didn't just give me a new routine; He gave me a completely new heart.</p>
+            </div>
+
+            <div id="story2" class="story-content">
+                <div class="solo-video-placeholder"></div>
+                <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Overcoming the Pressure</h3>
+                <p>Moving away from home and starting college brought a wave of anxiety I had never experienced before. The pressure to figure out my career, find my friend group, and somehow manage on my own was paralyzing.</p>
+                <p>It wasn't until I joined a Small Group at Church of the Highlands that things shifted. For the first time, I was surrounded by guys who were honest about their struggles and pointed me toward the peace found in Christ. Finding this community didn't instantly solve all my problems, but it showed me what true, lasting rest looks like.</p>
+            </div>
+
+            <div id="story3" class="story-content">
+                <div class="solo-video-placeholder"></div>
+                <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Out of Isolation</h3>
+                <p>I transferred here my junior year knowing absolutely no one. The university is massive, and while it's easy to be surrounded by tens of thousands of people, it is incredibly easy to feel entirely invisible.</p>
+                <p>When a girl in my biology lab finally invited me to attend ONE with her, I almost said no out of fear. But walking into that environment, I realized what authentic, deeply rooted community looked like. I wasn't just a face in the crowd anymore; I found a family that continually points me back to the love of Jesus.</p>
+            </div>
+        </div>
+    </main>
+
+    <main id="page-gospel" class="page-container">
+        <div class="page-header">
+            <h2>The Gospel</h2>
+            <p class="lead-text">The message of Jesus is simple, yet it changes absolutely everything.</p>
+        </div>
+        <div class="page-content">
+            <p><strong>The Search for More</strong><br>
+            We all have an innate desire for meaning, purpose, and deep fulfillment. Look around campus, and you will see everyone searching for it. We try to find it in academic success, in relationships, in status, or in finding the perfect career. But eventually, all of these things inevitably fail to satisfy us. The "more" that you are desperately looking for isn't a thing—it is a person.</p>
+            
+            <p><strong>The Separation</strong><br>
+            God created you intentionally and with a profound purpose: to be in relationship with Him. However, our mistakes, our pride, and our sin create a massive divide, separating us from a holy God. No amount of good behavior, religious attendance, or moral effort on our part can bridge that gap.</p>
+
+            <p><strong>The Solution</strong><br>
+            Because of His immense love for us, God didn't leave us in our separation. Jesus Christ stepped into our broken world. He lived the perfect life we couldn't live, died on the cross to pay the penalty for our sin, and defeated death by rising again. He bridged the gap entirely.</p>
+
+            <p><strong>The Invitation</strong><br>
+            Jesus offers grace, total forgiveness, and a completely new life. The beauty of the Gospel is that you don't have to clean yourself up to earn it; you simply have to believe and receive it. When we surrender our lives to Him, we finally find the "more" we've been searching for.</p>
+        </div>
+    </main>
+
+    <main id="page-community" class="page-container">
+        <div class="page-header">
+            <h2>Get Plugged In</h2>
+            <p class="lead-text">You were never meant to walk through college—or life—alone. Find your people here.</p>
+        </div>
+        <div class="page-content">
+            <div class="card">
+                <h3>ONE</h3>
+                <p><strong>A Ministry for College Students.</strong></p>
+                <p>ONE is a gathering designed specifically for the college demographic. Every single week, hundreds of students from across the university gather together. We experience passionate worship, hear a message completely relevant to the struggles and triumphs of college life, and build relationships that will last long after graduation.</p>
+                <p style="color: var(--text-main); margin-top: 15px;">Whether you've grown up in church your whole life or you're just starting to ask questions about faith, there is a seat for you at ONE.</p>
+            </div>
+            
+            <div class="card">
+                <h3>Church of the Highlands</h3>
+                <p><strong>Find Your Home Church.</strong></p>
+                <p>While ONE is an incredible midweek gathering, we believe deeply in being planted in a local church. Church of the Highlands offers dynamic Sunday morning services where you can worship alongside multiple generations.</p>
+                <p>Beyond Sunday, you can find life-changing community by joining a <strong>Small Group</strong> tailored to your interests or stage of life. You can also discover your unique, God-given purpose by taking the Growth Track and serving on the <strong>Dream Team</strong>, using your gifts to make a difference in our city.</p>
+            </div>
+        </div>
+    </main>
+
+
+    <main id="page-contact" class="page-container">
+        <div class="page-header">
+            <h2>Have Questions?</h2>
+            <p class="lead-text">We would love to hear your story, answer your questions, or simply help you take your next step.</p>
+        </div>
+        <div class="page-content">
+            <p>Reaching out can be intimidating, but there is absolutely no pressure here. Fill out the form below, and someone from our team will reach out to grab coffee, answer questions about ONE, or help you find a Small Group.</p>
+            
+            <form onsubmit="event.preventDefault(); alert('Message sent! We will connect with you soon.');">
+                <input type="text" placeholder="Your Name" required>
+                <input type="email" placeholder="Your Email (or Phone Number)" required>
+                <textarea rows="6" placeholder="How can we help? What questions do you have? Or share a bit of your story here..." required></textarea>
+                <button type="submit" class="submit-btn">Send Message</button>
+            </form>
+        </div>
+    </main>
+
+    <button class="fab-share" id="share-btn" aria-label="Share">
+        <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
+    </button>
+
+    <nav class="bottom-nav" id="bottom-nav">
+        <div class="nav-item locked-tab pos-1" data-target="page-stories">
+            <svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            <span>Stories</span>
+        </div>
+        
+        <div class="nav-item locked-tab pos-2" data-target="page-gospel">
+            <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            <span>Gospel</span>
+        </div>
+
+        <div class="nav-item home-btn active" data-target="page-home">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span>Home</span>
+        </div>
+
+        <div class="nav-item locked-tab pos-4" data-target="page-community">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <span>Connect</span>
+        </div>
+
+        <div class="nav-item locked-tab pos-5" data-target="page-contact">
+            <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            <span>Contact</span>
+        </div>
+    </nav>
+
+    <script>
+        // --- 15 Second Navigation Lock Logic ---
+        const LOCK_TIME_MS = 15000; 
+        const progressCircle = document.getElementById('progress-circle');
+        const scrollText = document.getElementById('scroll-text');
+        const scrollIndicator = document.getElementById('scroll-indicator');
+        
+        const circumference = 2 * Math.PI * 22; // r=22
+        let timePassed = 0;
+
+        const timerInterval = setInterval(() => {
+            timePassed += 1000;
+            const timeLeft = (LOCK_TIME_MS - timePassed) / 1000;
+            
+            scrollText.innerText = `Explore in ${timeLeft}s`;
+            
+            const fraction = timePassed / LOCK_TIME_MS;
+            const offset = circumference - (fraction * circumference);
+            progressCircle.style.strokeDashoffset = offset;
+
+            if (timePassed >= LOCK_TIME_MS) {
+                clearInterval(timerInterval);
+                scrollIndicator.style.opacity = '0';
+                setTimeout(() => scrollIndicator.style.display = 'none', 600);
+                
+                // Staggered slide out: inner buttons first, then outer buttons
+                setTimeout(() => {
+                    document.querySelector('.pos-2').classList.remove('locked-tab');
+                    document.querySelector('.pos-4').classList.remove('locked-tab');
+                }, 0);
+                
+                setTimeout(() => {
+                    document.querySelector('.pos-1').classList.remove('locked-tab');
+                    document.querySelector('.pos-5').classList.remove('locked-tab');
+                }, 150);
+            }
+        }, 1000);
+
+        // --- Audio/Mute Toggle ---
+        const unmuteBtn = document.getElementById('unmute-btn');
+        const video = document.getElementById('main-video');
+        let isMuted = true;
+
+        const captionsArr = [
+            "I achieved everything I thought I wanted...",
+            "But the success didn't fulfill me.",
+            "I was searching for a real purpose.",
+            "And then everything changed."
+        ];
+        let capIndex = 0;
+        setInterval(() => {
+            capIndex = (capIndex + 1) % captionsArr.length;
+            const captionEl = document.getElementById('caption-text');
+            if(captionEl) {
+                captionEl.style.opacity = 0;
+                setTimeout(() => {
+                    captionEl.innerText = captionsArr[capIndex];
+                    captionEl.style.opacity = 1;
+                }, 500);
+            }
+        }, 4000);
+
+        unmuteBtn.addEventListener('click', () => {
+            isMuted = !isMuted;
+            video.muted = isMuted;
+            
+            if (isMuted) {
+                unmuteBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg> Tap to Unmute';
+            } else {
+                unmuteBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg> Mute Sound';
+            }
+        });
+
+        // --- Bottom Navigation Logic (Tab Switching) ---
+        const navItems = document.querySelectorAll('.nav-item');
+        const pages = document.querySelectorAll('.page-container');
+
+        navItems.forEach(item => {
+            item.addEventListener('click', function() {
+                // Ignore clicks if the tab is still locked/hidden
+                if(this.classList.contains('locked-tab')) return;
+
+                // Remove active class from all nav items and pages
+                navItems.forEach(nav => nav.classList.remove('active'));
+                pages.forEach(page => page.classList.remove('active'));
+
+                // Add active class to clicked nav item
+                this.classList.add('active');
+
+                // Show target page
+                const targetId = this.getAttribute('data-target');
+                const targetPage = document.getElementById(targetId);
+                targetPage.classList.add('active');
+                
+                // Reset scroll position of target page
+                targetPage.scrollTop = 0;
+            });
+        });
+
+        // --- Sub-Tab Switching Logic (Inside Stories) ---
+        function openStory(storyId, element) {
+            const storyContents = document.getElementsByClassName("story-content");
+            for (let i = 0; i < storyContents.length; i++) {
+                storyContents[i].classList.remove("active");
+            }
+            
+            const storyBtns = document.getElementsByClassName("story-btn");
+            for (let i = 0; i < storyBtns.length; i++) {
+                storyBtns[i].classList.remove("active");
+            }
+            
+            document.getElementById(storyId).classList.add("active");
+            element.classList.add("active");
+        }
+
+        // --- Native Share Functionality ---
+        document.getElementById('share-btn').addEventListener('click', async () => {
+            const shareData = {
+                title: 'There Is More',
+                text: 'Check out these stories of hope.',
+                url: window.location.href
+            };
+
+            if (navigator.share) {
+                try {
+                    await navigator.share(shareData);
+                } catch (err) {
+                    console.error('Error sharing:', err);
+                }
+            } else {
+                alert('Link copied to clipboard! Share it with a friend.');
+            }
+        });
+    </script>
+</body>
+</html>
